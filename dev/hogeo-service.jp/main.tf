@@ -47,11 +47,12 @@ terraform{
   }
 }
 
+# Todo: 複数バックエンドの時用になってない
 module "ComputeBackendService" {
   source = "../../modules/ComputeBackendService"
   health_check = module.ComputeHealthCheck.health_check
   network_endpoint_group = module.ComputeNetworkEndpointGroup.network_endpoint_group
-  security_policy = var.security_policy
+  security_policy = module.ComputeSecurityPolicy.security_policy
 }
 
 module "ComputeForwardingRule" {
