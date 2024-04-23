@@ -1,23 +1,9 @@
-variable "project" {
-
-}
-
-variable "bucket" {
-
+locals {
+  zone = "asia-northeast1-a"
 }
 
 # ToDo
-variable "security_policy" {
-
-}
-
-# ToDo
-variable "ip_adderss" {
-
-}
-
-# ToDo
-variable "zone" {
+variable "ip_address" {
 
 }
 
@@ -30,66 +16,66 @@ variable "network" {
 variable "subnetwork" {
 
 }
-
-# ToDo
-variable "instance" {
-
-}
 provider "google" {
-  project = var.project
-  region = "asia-northeast1"
+  project = "TBA"
+  region  = "asia-northeast1"
 }
 
-terraform{
+terraform {
   backend "gcs" {
-    bucket = var.bucket
-    prefix  = "hogeo-service.jp"
+    bucket = "TBA"
+    prefix = "hogeo-service.jp"
   }
 }
 
 # Todo: 複数バックエンドの時用になってない
 module "ComputeBackendService" {
-  source = "../../modules/ComputeBackendService"
-  health_check = module.ComputeHealthCheck.health_check
+  source                 = "../../modules/ComputeBackendService"
+  health_check           = module.ComputeHealthCheck.health_check
   network_endpoint_group = module.ComputeNetworkEndpointGroup.network_endpoint_group
-  security_policy = module.ComputeSecurityPolicy.security_policy
+  security_policy        = module.ComputeSecurityPolicy.security_policy
+}
+
+module "ComputeInstance" {
+  source               = "../../modules/ComputeInstance"
+  zone = local.zone
 }
 
 module "ComputeForwardingRule" {
-  source = "../../ComputeForwardingRule"
-  target_https_proxy = module.ComputeTargetHTTPSProxy.target_https_proxy
+  source               = "../../modules/ComputeForwardingRule"
+  target_https_proxy   = module.ComputeTargetHTTPSProxy.target_https_proxy
   forwarding_rule_name = "my-service-forwarding-rule"
-  ip_address = var.ip_address
+  ip_address           = var.ip_address
 }
 
 module "ComputeHealthCheck" {
-  source = "../../ComputeHealthCheck"
+  source            = "../../modules/ComputeHealthCheck"
   health_check_name = "my-service"
-  health_path = "healthcheck"
+  health_path       = "healthcheck"
 }
 
 module "ComputeNetworkEndpointGroup" {
-  source = "../../ComputeNetworkEndpointGroup"
-  zone = var.zone
-  network = var.network
+  source     = "../../modules/ComputeNetworkEndpointGroup"
+  zone       = local.zone
+  network    = var.network
   subnetwork = var.subnetwork
   ip_address = var.ip_address
-  instance =  var.instance
-}
-
-module "ComputeTargetHTTPProxy" {
-  source = "../../ComputeTargetHTTPProxy"
+  instance   = module.ComputeInstance.compute_instance_default
 }
 
 module "ComputeTargetHTTPSProxy" {
-  source = "../../ComputeTargetHTTPSProxy"
-  url_map_id = module.ComputeURLMap.url_map_id
+  source                  = "../../modules/ComputeTargetHTTPSProxy"
+  url_map_id              = module.ComputeURLMap.url_map_id
   target_https_proxy_name = "hogeo-service-jp"
 }
 
 module "ComputeURLMap" {
-  source = "../../ComputeURLMap"
-  url_map_name = "hogeo-service-jp"
+  source          = "../../modules/ComputeURLMap"
+  url_map_name    = "hogeo-service-jp"
   backend_service = module.ComputeBackendService.google_compute_backend_service
 
+}
+module "ComputeSecurityPolicy" {
+  source = "../../modules/ComputeSecurityPolicy"
+  security_policy_name = "default_allow_from_VPN"
 }

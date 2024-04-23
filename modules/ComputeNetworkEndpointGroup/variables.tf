@@ -17,3 +17,7 @@ variable "subnetwork" {
 variable "zone" {
     type = string
 }
+
+variable "compute_instance_default" {
+    type = string
+}
