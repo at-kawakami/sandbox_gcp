@@ -77,5 +77,5 @@ module "ComputeURLMap" {
 }
 module "ComputeSecurityPolicy" {
   source = "../../modules/ComputeSecurityPolicy"
-  security_policy_name = "default_allow_from_VPN"
+  security_policy_name = "defaul-allow-from-vpn"
 }
