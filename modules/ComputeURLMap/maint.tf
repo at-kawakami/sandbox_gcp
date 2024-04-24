@@ -13,9 +13,10 @@ resource "google_compute_url_map" "main" {
   #}
 
   dynamic "host_rule" {
-    for_each = { for i in var.host_rules : i.hosts => i }
+    for_each = var.host_rules
     content {
-      hosts = host_rule.value.hosts
+      description  = "Host rule for ${host_rule.value.hosts}"
+      hosts         = [host_rule.value.hosts]
       path_matcher = host_rule.value.path_matcher
     }
   }
