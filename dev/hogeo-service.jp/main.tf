@@ -1,5 +1,12 @@
 locals {
   zone = "asia-northeast1-a"
+  host_rules = [{
+    hosts = "dev-hogeo-web-jp"
+    path_matcher =  "dev-hogeo-web-jp"
+    }, {
+    hosts = "dev2-hogeo-web-jp"
+    path_matcher =  "dev2-hogeo-web-jp"
+  }]
 }
 
 # ToDo
@@ -73,6 +80,7 @@ module "ComputeURLMap" {
   source          = "../../modules/ComputeURLMap"
   url_map_name    = "hogeo-service-jp"
   backend_service = module.ComputeBackendService.google_compute_backend_service
+  host_rules = local.host_rules
 
 }
 module "ComputeSecurityPolicy" {
